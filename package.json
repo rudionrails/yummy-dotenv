@@ -16,5 +16,8 @@
     "settings"
   ],
   "author": "rudionrails",
-  "license": "BSD-2-Clause"
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "dotenv": "^6.0.0"
+  }
 }
