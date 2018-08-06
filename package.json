@@ -1,0 +1,20 @@
+{
+  "name": "@yummy/dotenv",
+  "version": "1.0.0",
+  "description": "A yummy dotenv library",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dotenv",
+    "env",
+    ".env",
+    "environment",
+    "variables",
+    "config",
+    "settings"
+  ],
+  "author": "rudionrails",
+  "license": "BSD-2-Clause"
+}
