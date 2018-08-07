@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "description": "A yummy dotenv library",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": "rudionrails",
+  "license": "MIT",
+  "homepage": "https://github.com/rudionrails/yummy-dotenv",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rudionrails/yummy-dotenv.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rudionrails/yummy-dotenv/issues"
   },
   "keywords": [
     "dotenv",
@@ -15,8 +22,9 @@
     "config",
     "settings"
   ],
-  "author": "rudionrails",
-  "license": "BSD-2-Clause",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "dotenv": "^6.0.0"
   }
