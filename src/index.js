@@ -1,10 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 function config({
   context = path.resolve(process.cwd()),
-  env = process.env.NODE_ENV || 'development',
   system = true,
   files = [
     '.env',
@@ -12,13 +13,13 @@ function config({
     `.env.${NODE_ENV}`,
     `.env.${NODE_ENV}.local`,
   ],
-}) {
+} = {}) {
   const exists = file => fs.existsSync(path.resolve(context, file));
-  const parse => file => exists(file) ? dotenv.parse(fs.readFileSync(path.resolve(context, file))) : {};
-  const mergeFile => (object, file) => Object.assign({}, object, parse(file));
+  const parse = file => exists(file) ? dotenv.parse(fs.readFileSync(path.resolve(context, file))) : {};
+  const mergeFile = (object, file) => Object.assign({}, object, parse(file));
   const onlyKeys = (object, file) => Object.keys(parse(file)).reduce(
-    (acc, key) => Object.assign({}, acc, { [key]: acc[key] }),
-    object,
+    (acc, key) => Object.assign({}, acc, { [key]: object[key] }),
+    {},
   );
 
   return [
@@ -55,7 +56,7 @@ function config({
   ].reduce((acc, fn) => fn(acc), {});
 }
 
-export default {
+module.exports = {
   parse: dotenv.parse,
   load: config,
   config,

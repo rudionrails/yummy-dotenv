@@ -1,6 +1,8 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 # dependencies
+.cache/
+dist/
 /node_modules
 
 # testing
@@ -14,5 +16,4 @@
 
 # misc
 .DS_Store
-.env
 npm-debug.log*
