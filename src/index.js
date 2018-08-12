@@ -1,7 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const childProcess = require('child_process');
-const dotenv = require('dotenv');
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -15,10 +14,11 @@ function parse(context, file) {
 function config({
   context = path.resolve(process.cwd()),
   system = true,
-  files: [
+  files = [
     '.env',
-    `env.${NODE_ENV}`,
-    `env.${NODE_ENV}.local`,
+    '.env.local',
+    `.env.${NODE_ENV}`,
+    `.env.${NODE_ENV}.local`,
   ],
 }) {
   const env = {};
@@ -41,19 +41,23 @@ function config({
   //
   //    FOO=
   //    # => { FOO: '' }
-    Object.entries(parse(context, '.env.defaults')).forEach(([key, value]) => {
-      env[key] = value;
-    });
+  Object.entries(parse(context, '.env.defaults')).forEach(([key, value]) => {
+    env[key] = value;
+  });
 
   // load the vars from the files
   //
   // if not specifically defined, the default is:
   //    .env
+  //    .env.local
   //    .env.development
   //    .env.development.local
   files.map(file => Object.assign(env, parse(context, file)));
 
-  // when configured, system vars take precedence
+  // when allowed (default: true), system vars take precedence
+  //
+  // unlike values taken form the .env.schema, those will be set
+  // to '' (empty string) and not null.
   if (system) {
     Object.keys(env).forEach((key) => {
       env[key] = process.env[key] || env[key];
@@ -63,8 +67,8 @@ function config({
   return env;
 }
 
-module.exports = {
+export default {
+  parse: dotenv.parse,
   load: config,
   config,
-  parse: dotenv.parse,
 };
