@@ -7,6 +7,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 function config({
   context = path.resolve(process.cwd()),
   system = true,
+
+  schema = '.env.schema',
+  defaults = '.env.defaults',
   files = [
     '.env',
     '.env.local',
@@ -34,7 +37,7 @@ function config({
     //
     //    FOO=
     //    # => { FOO: '' }
-    object => mergeFile(object, '.env.defaults'),
+    object => defaults ? mergeFile(object, defaults) : object,
 
     // load the vars from the files
     //
@@ -52,7 +55,7 @@ function config({
     object => system ? Object.assign({}, object, process.env) : object,
 
     // when configured (default: true), reduce thea vars to the schema
-    object => exists('.env.schema') ? onlyKeys(object, '.env.schema'): object,
+    object => schema ? onlyKeys(object, schema): object,
   ].reduce((acc, fn) => fn(acc), {});
 }
 
