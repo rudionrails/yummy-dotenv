@@ -7,7 +7,6 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 function config({
   context = path.resolve(process.cwd()),
   system = true,
-
   schema = '.env.schema',
   defaults = '.env.defaults',
   files = [
@@ -19,8 +18,12 @@ function config({
 } = {}) {
   const exists = file => fs.existsSync(path.resolve(context, file));
   const parse = file => exists(file) ? dotenv.parse(fs.readFileSync(path.resolve(context, file))) : {};
-  const mergeFile = (object, file) => Object.assign({}, object, parse(file));
-  const onlyKeys = (object, file) => Object.keys(parse(file)).reduce(
+  const read = (object, file) => Object.assign({}, object, parse(file));
+  const only = (object, env) => Object.keys(object).reduce(
+    (acc, key) => Object.assign({}, acc, { [key]: env[key] || acc[key] }),
+    object,
+  );
+  const pick = (object, env) => Object.keys(env).reduce(
     (acc, key) => Object.assign({}, acc, { [key]: object[key] }),
     {},
   );
@@ -37,7 +40,7 @@ function config({
     //
     //    FOO=
     //    # => { FOO: '' }
-    object => defaults ? mergeFile(object, defaults) : object,
+    object => defaults ? read(object, defaults) : object,
 
     // load the vars from the files
     //
@@ -46,16 +49,16 @@ function config({
     //    .env.local
     //    .env.development
     //    .env.development.local
-    object => files.reduce(mergeFile, object),
+    object => files.reduce(read, object),
 
-    // when configured (default: true), system vars take precedence
+    // // when schema is set (default: true), reduce the vars to it
+    object => schema ? pick(object, parse(schema)): object,
+
+    // when system var are allowed (default: true), they take precedence
     //
     // unlike values taken form the .env.schema, those will be set
     // to '' (empty string) and not null.
-    object => system ? Object.assign({}, object, process.env) : object,
-
-    // when configured (default: true), reduce thea vars to the schema
-    object => schema ? onlyKeys(object, schema): object,
+    object => system ? only(object, process.env) : object,
   ].reduce((acc, fn) => fn(acc), {});
 }
 
