@@ -19,6 +19,7 @@ function config({
   const exists = file => fs.existsSync(path.resolve(context, file));
   const parse = file => exists(file) ? dotenv.parse(fs.readFileSync(path.resolve(context, file))) : {};
   const read = (object, file) => Object.assign({}, object, parse(file));
+  const map = (object, files) => files.reduce(read, object);
   const only = (object, env) => Object.keys(object).reduce(
     (acc, key) => Object.assign({}, acc, { [key]: env[key] || acc[key] }),
     object,
@@ -49,7 +50,7 @@ function config({
     //    .env.local
     //    .env.development
     //    .env.development.local
-    object => files.reduce(read, object),
+    object => map(object, files),
 
     // // when schema is set (default: true), reduce the vars to it
     object => schema ? pick(object, parse(schema)): object,

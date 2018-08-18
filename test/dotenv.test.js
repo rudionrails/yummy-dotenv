@@ -79,3 +79,16 @@ test('[options.schema] to be ignored', (t) => {
     BAZ: 'baz-env-local',
   });
 });
+
+test('[options.files] to read correctly', (t) => {
+  const env = dotenv.config({
+    ...options,
+    files: ['.env'],
+  });
+
+  t.deepEqual(env, {
+    FOO: 'foo-env',
+    BAZ: undefined,
+    XYZ: undefined,
+  });
+});
