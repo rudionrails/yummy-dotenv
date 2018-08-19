@@ -31,7 +31,7 @@
     "build": "microbundle --compress=false --sourcemap=false",
     "dev": "microbundle watch --compress=false",
     "prebuild": "rm -rf ./dist",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "ava"
   },
   "dependencies": {
