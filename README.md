@@ -44,10 +44,10 @@ Use this to provide your dotenv config with some default values. Values defined 
 
 ```javascript
 // the default value
-const env = dotenv.config({ defaults: '.env.defaults })
+const env = dotenv.config({ defaults: '.env.defaults' })
 
 // point to a different file
-const env = dotenv.config({ defaults: '/<path>/<to>/.env.defaults })
+const env = dotenv.config({ defaults: '/<path>/<to>/.env.defaults' })
 
 // disable it explicitly
 const env = dotenv.config({ defaults: false });
@@ -74,10 +74,10 @@ You may wish to limit your dotenv variables to specific keys only. This is usefu
 
 ```javascript
 // the default value
-const env = dotenv.config({ schema: '.env.schema })
+const env = dotenv.config({ schema: '.env.schema' })
 
 // point to a different file
-const env = dotenv.config({ schema: '/<path>/<to>/.env.schema })
+const env = dotenv.config({ schema: '/<path>/<to>/.env.schema' })
 
 // disable it explicitly
 const env = dotenv.config({ schema: false });
