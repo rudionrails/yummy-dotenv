@@ -19,11 +19,11 @@ test.afterEach((t) => {
 test('to read from the context dir', (t) => {
   const env = dotenv.config(options);
 
-  t.deepEqual(env, {
+  t.deepEqual({
     FOO: 'foo-env',
     BAZ: 'baz-env-local',
     XYZ: undefined,
-  });
+  }, env);
 });
 
 test('[options.defaults] to be ignored', (t) => {
@@ -32,11 +32,11 @@ test('[options.defaults] to be ignored', (t) => {
     defaults: false,
   });
 
-  t.deepEqual(env, {
+  t.deepEqual({
     FOO: 'foo-env',
     BAZ: 'baz-env-local',
     XYZ: undefined,
-  });
+  }, env);
 });
 
 test('[options.system] to read system variables', (t) => {
@@ -46,11 +46,11 @@ test('[options.system] to read system variables', (t) => {
 
   const env = dotenv.config(options);
 
-  t.deepEqual(env, {
+  t.deepEqual({
     FOO: 'foo-process-env',
     BAZ: 'baz-env-local',
     XYZ: 'xyz-process-env',
-  });
+  }, env);
 });
 
 test('[options.system] to ignore system variables', (t) => {
@@ -59,11 +59,11 @@ test('[options.system] to ignore system variables', (t) => {
     system: false,
   });
 
-  t.deepEqual(env, {
+  t.deepEqual({
     FOO: 'foo-env',
     BAZ: 'baz-env-local',
     XYZ: undefined,
-  });
+  }, env);
 });
 
 test('[options.schema] to be ignored', (t) => {
@@ -72,12 +72,12 @@ test('[options.schema] to be ignored', (t) => {
     schema: false,
   });
 
-  t.deepEqual(env, {
+  t.deepEqual({
     ABC: 'abc-env',
     FOO: 'foo-env',
     BAR: 'bar-defaults',
     BAZ: 'baz-env-local',
-  });
+  }, env);
 });
 
 test('[options.files] to read correctly', (t) => {
@@ -86,9 +86,9 @@ test('[options.files] to read correctly', (t) => {
     files: ['.env'],
   });
 
-  t.deepEqual(env, {
+  t.deepEqual({
     FOO: 'foo-env',
     BAZ: undefined,
     XYZ: undefined,
-  });
+  }, env);
 });
