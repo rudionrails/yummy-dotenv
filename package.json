@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "description": "A yummy dotenv library",
   "main": "dist/dotenv.js",
-  "source": "src/index.js",
+  "module": "dist/dotenv.m.js",
   "author": "Rudolf Schmidt <hello@rudionrails.com>",
   "license": "MIT",
   "homepage": "https://github.com/rudionrails/yummy-dotenv",
@@ -28,8 +28,7 @@
     "settings"
   ],
   "scripts": {
-    "build": "microbundle --compress=false --sourcemap=false",
-    "dev": "microbundle watch --compress=false",
+    "build": "rollup -c",
     "prebuild": "rm -rf ./dist",
     "prepublishOnly": "npm run build",
     "test": "ava"
@@ -39,6 +38,8 @@
   },
   "devDependencies": {
     "ava": "^0.25.0",
-    "microbundle": "^0.6.0"
+    "rollup": "^0.64.1",
+    "rollup-plugin-commonjs": "^9.1.5",
+    "rollup-plugin-node-resolve": "^3.3.0"
   }
 }
