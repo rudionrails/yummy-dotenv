@@ -4,7 +4,13 @@ const dotenv = require('dotenv');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-const pipe = (...list) => object => list.reduce((acc, fn) => fn(acc), object);
+const parse = filename => fs.existsSync(filename)
+  ? dotenv.parse(fs.readFileSync(filename))
+  : {};
+const pipe = (...list) => object => list.reduce((acc, fn) => {
+  console.log(acc);
+  return fn(acc);
+}, object);
 const map = (list, fn) => list.map(fn);
 const when = (predicate, fn) => object => predicate ? fn(object) : object;
 const keys = env => Object.keys(env);
@@ -27,29 +33,26 @@ function config({
     `.env.${NODE_ENV}.local`,
   ],
 } = {}) {
-  const parse = file => object => {
-    const filename = path.resolve(context, file);
-    const env = fs.existsSync(filename)
-      ? dotenv.parse(fs.readFileSync(path.resolve(context, file)))
-      : {};
-
+  const read = file => object => {
+    const env = parse(path.resolve(context, file));
     return assign(env)(object);
   };
-  const pick = file => object => Object.keys(parse(file)({})).reduce(
+
+  const pick = file => object => Object.keys(read(file)({})).reduce(
     (acc, key) => assign({ [key]: object[key] })(acc),
     {},
   );
 
   return pipe(
-    when(defaults, parse(defaults)),
-    pipe(...map(files, parse)),
+    when(defaults, read(defaults)),
+    pipe(...map(files, read)),
     when(schema, pick(schema)),
     when(system, only(process.env)),
   )({});
 }
 
 module.exports = {
-  parse: dotenv.parse,
   load: config,
   config,
+  parse,
 };
