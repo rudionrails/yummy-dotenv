@@ -4,20 +4,12 @@ const dotenv = require('dotenv');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-const parse = filename => fs.existsSync(filename)
-  ? dotenv.parse(fs.readFileSync(filename))
-  : {};
-const pipe = (...list) => object => list.reduce((acc, fn) => {
-  console.log(acc);
-  return fn(acc);
-}, object);
-const map = (list, fn) => list.map(fn);
-const when = (predicate, fn) => object => predicate ? fn(object) : object;
-const keys = env => Object.keys(env);
-
-const assign = env => object => Object.assign({}, object, env);
-const only = env => object => Object.keys(object).reduce(
-  (acc, key) => assign({ [key]: env[key] || acc[key] })(acc),
+const assign = x => y => Object.assign({}, x, y);
+const identity = x => x;
+const when = (condition, fn) => x => condition ? fn(x) : x;
+const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+const only = from => object => Object.keys(object).reduce(
+  (acc, key) => assign(acc)({ [key]: from[key] || acc[key] }),
   object,
 );
 
@@ -33,26 +25,31 @@ function config({
     `.env.${NODE_ENV}.local`,
   ],
 } = {}) {
-  const read = file => object => {
-    const env = parse(path.resolve(context, file));
-    return assign(env)(object);
+  const resolve = file => path.resolve(context, file);
+  const exists = file => file && fs.existsSync(resolve(file));
+  const read = file => object => exists(file)
+    ? pipe(resolve, fs.readFileSync, dotenv.parse, assign(object))(file)
+    : object;
+
+  const filter = file => object => {
+    const names = pipe(read(file), Object.keys)({});
+
+    return names.reduce(
+      (acc, name) => assign(acc)({ [name]: object[name] }),
+      {},
+    );
   };
 
-  const pick = file => object => Object.keys(read(file)({})).reduce(
-    (acc, key) => assign({ [key]: object[key] })(acc),
-    {},
-  );
-
   return pipe(
-    when(defaults, read(defaults)),
-    pipe(...map(files, read)),
-    when(schema, pick(schema)),
+    when(exists(defaults), read(defaults)),
+    ...files.map(file => when(exists(file), read(file))),
+    when(exists(schema), filter(schema)),
     when(system, only(process.env)),
   )({});
 }
 
 module.exports = {
+  parse: dotenv.parse,
   load: config,
   config,
-  parse,
 };

@@ -1,5 +1,4 @@
 const path = require('path');
-const test = require('ava');
 
 // module under test
 const dotenv = require('../src/index');
@@ -8,7 +7,7 @@ const options = {
   context: path.resolve(__dirname, 'fixtures'),
 };
 
-test.afterEach((t) => {
+afterEach(() => {
   delete process.env.FOO;
   delete process.env.BAR;
   delete process.env.BAZ;
@@ -16,79 +15,156 @@ test.afterEach((t) => {
   delete process.env.XYZ;
 });
 
-test('to read from the context dir', (t) => {
+test('to read from the context dir', () => {
   const env = dotenv.config(options);
 
-  t.deepEqual({
+  expect(env).toEqual({
     FOO: 'foo-env',
     BAZ: 'baz-env-local',
     XYZ: undefined,
-  }, env);
+  });
 });
 
-test('[options.defaults] to be ignored', (t) => {
-  const env = dotenv.config({
-    ...options,
-    defaults: false,
+describe('options.defaults', () => {
+  test('to be ignored when false', () => {
+    const env = dotenv.config({
+      ...options,
+      defaults: false,
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
   });
 
-  t.deepEqual({
-    FOO: 'foo-env',
-    BAZ: 'baz-env-local',
-    XYZ: undefined,
-  }, env);
-});
+  test('to ignore when file does not exist', () => {
+    const env = dotenv.config({
+      ...options,
+      defaults: '.env.defaults-not-there',
+    });
 
-test('[options.system] to read system variables', (t) => {
-  process.env.FOO = 'foo-process-env';
-  process.env.ABC = 'abc-process-env'; // to be ignored
-  process.env.XYZ = 'xyz-process-env';
-
-  const env = dotenv.config(options);
-
-  t.deepEqual({
-    FOO: 'foo-process-env',
-    BAZ: 'baz-env-local',
-    XYZ: 'xyz-process-env',
-  }, env);
-});
-
-test('[options.system] to ignore system variables', (t) => {
-  const env = dotenv.config({
-    ...options,
-    system: false,
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
   });
 
-  t.deepEqual({
-    FOO: 'foo-env',
-    BAZ: 'baz-env-local',
-    XYZ: undefined,
-  }, env);
+  test('to allow override', () => {
+    const env = dotenv.config({
+      ...options,
+      defaults: '.env.defaults-manual',
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: 'xyz-defaults-manual',
+    });
+  });
 });
 
-test('[options.schema] to be ignored', (t) => {
-  const env = dotenv.config({
-    ...options,
-    schema: false,
+describe('options.systen', () => {
+  test('to read system variables', () => {
+    process.env.FOO = 'foo-process-env';
+    process.env.ABC = 'abc-process-env'; // to be ignored
+    process.env.XYZ = 'xyz-process-env';
+
+    const env = dotenv.config(options);
+
+    expect(env).toEqual({
+      FOO: 'foo-process-env',
+      BAZ: 'baz-env-local',
+      XYZ: 'xyz-process-env',
+    });
   });
 
-  t.deepEqual({
-    ABC: 'abc-env',
-    FOO: 'foo-env',
-    BAR: 'bar-defaults',
-    BAZ: 'baz-env-local',
-  }, env);
+  test('to be ignored when false', () => {
+    const env = dotenv.config({
+      ...options,
+      system: false,
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
+  });
 });
 
-test('[options.files] to read correctly', (t) => {
-  const env = dotenv.config({
-    ...options,
-    files: ['.env'],
+describe('options.schema', () => {
+  test('to be ignored when false', () => {
+    const env = dotenv.config({
+      ...options,
+      schema: false,
+    });
+
+    expect(env).toEqual({
+      ABC: 'abc-env',
+      FOO: 'foo-env',
+      BAR: 'bar-defaults',
+      BAZ: 'baz-env-local',
+    });
   });
 
-  t.deepEqual({
-    FOO: 'foo-env',
-    BAZ: undefined,
-    XYZ: undefined,
-  }, env);
+  test('to ignore when file does not exist', () => {
+    const env = dotenv.config({
+      ...options,
+      schema: '.env.schema-not-there',
+    });
+
+    expect(env).toEqual({
+      ABC: 'abc-env',
+      FOO: 'foo-env',
+      BAR: 'bar-defaults',
+      BAZ: 'baz-env-local',
+    });
+  });
+
+  test('to allow override', () => {
+    const env = dotenv.config({
+      ...options,
+      schema: '.env.schema-manual',
+    });
+
+    expect(env).toEqual({
+      ABC: 'abc-env',
+    });
+  });
+});
+
+describe('options.files', () => {
+  test('to read correctly', () => {
+    const env = dotenv.config({
+      ...options,
+      files: ['.env'],
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: undefined,
+      XYZ: undefined,
+    });
+  });
+
+  test('to ignore when files dont exist', () => {
+    const env = dotenv.config({
+      ...options,
+      files: [
+        '.env.not-there',
+        '.env',
+        '.env.also-not-there',
+        '.env.local',
+      ],
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
+  });
 });
