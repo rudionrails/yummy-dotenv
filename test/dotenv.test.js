@@ -137,7 +137,7 @@ describe('options.schema', () => {
 });
 
 describe('options.files', () => {
-  test('to read correctly', () => {
+  test('to allow overrides', () => {
     const env = dotenv.config({
       ...options,
       files: ['.env'],
@@ -159,6 +159,32 @@ describe('options.files', () => {
         '.env.also-not-there',
         '.env.local',
       ],
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
+  });
+
+  test('to allow string', () => {
+    const env = dotenv.config({
+      ...options,
+      files: '.env',
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: undefined,
+      XYZ: undefined,
+    });
+  });
+
+  test('to allow comma-separated string', () => {
+    const env = dotenv.config({
+      ...options,
+      files: '.env, .env.local',
     });
 
     expect(env).toEqual({
