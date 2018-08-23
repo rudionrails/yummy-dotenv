@@ -1,6 +1,6 @@
 {
   "name": "@yummy/dotenv",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A yummy dotenv library",
   "main": "dist/dotenv.js",
   "module": "dist/dotenv.m.js",
