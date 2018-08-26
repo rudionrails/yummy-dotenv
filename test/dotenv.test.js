@@ -7,14 +7,6 @@ const options = {
   context: path.resolve(__dirname, 'fixtures'),
 };
 
-afterEach(() => {
-  delete process.env.FOO;
-  delete process.env.BAR;
-  delete process.env.BAZ;
-  delete process.env.ABC;
-  delete process.env.XYZ;
-});
-
 test('to read from the context dir', () => {
   const env = dotenv.config(options);
 
@@ -67,6 +59,12 @@ describe('options.defaults', () => {
 });
 
 describe('options.systen', () => {
+  afterEach(() => {
+    delete process.env.FOO;
+    delete process.env.ABC;
+    delete process.env.XYZ;
+  });
+
   test('to read system variables', () => {
     process.env.FOO = 'foo-process-env';
     process.env.ABC = 'abc-process-env'; // to be ignored
@@ -191,6 +189,30 @@ describe('options.files', () => {
       FOO: 'foo-env',
       BAZ: 'baz-env-local',
       XYZ: undefined,
+    });
+  });
+});
+
+describe('variable substitution', () => {
+  afterEach(() => {
+    delete process.env.XYZ;
+  });
+
+  test('to substitute correctly', () => {
+    process.env.XYZ = 'XYZ-process-env';
+
+    const env = dotenv.config({
+      ...options,
+      defaults: false,
+      schema: false,
+      files: '.env.variables',
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAR: 'foo-env@baz-env/XYZ-process-env',
+      BAZ: 'baz-env',
+      ABC: '',
     });
   });
 });

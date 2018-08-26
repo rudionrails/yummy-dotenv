@@ -17,6 +17,26 @@ const toArray = value => Array.isArray(value)
   ? value
   : String(value).trim().split(/\s*,\s*/);
 
+const substitute = object => {
+  const regex = new RegExp(/(?:\$\{)(\w+)(?:\})/);
+  const replace = value => {
+    let newVal = value;
+
+    while (regex.test(newVal)) {
+      const [pattern, name] = regex.exec(newVal);
+      const substitution = object[name] || process.env[name] || '';
+      newVal = newVal.replace(pattern, substitution);
+    };
+
+    return newVal;
+  };
+
+  return Object.entries(object).reduce(
+    (acc, [key, value]) => assign(acc)({ [key]: replace(value) }),
+    {},
+  );
+};
+
 function config({
   context = path.resolve(process.cwd()),
   defaults = '.env.defaults',
@@ -32,16 +52,13 @@ function config({
   const resolve = file => path.resolve(context, file);
   const exists = file => file && pipe(resolve, fs.existsSync)(file);
   const parse = file => pipe(resolve, fs.readFileSync, dotenv.parse)(file);
-
-  const read = file => object => exists(file)
-    ? pipe(parse, assign(object))(file)
-    : object;
+  const read = file => when(exists(file), object => pipe(parse, assign(object))(file));
 
   const filter = file => object => {
-    const names = pipe(parse, Object.keys)(file);
+    const keys = pipe(parse, Object.keys)(file);
 
-    return names.reduce(
-      (acc, name) => assign(acc)({ [name]: object[name] }),
+    return keys.reduce(
+      (acc, key) => assign(acc)({ [key]: object[key] }),
       {},
     );
   };
@@ -51,6 +68,7 @@ function config({
     ...toArray(files).map(file => when(exists(file), read(file))),
     when(exists(schema), filter(schema)),
     when(system, only(process.env)),
+    substitute,
   )({});
 }
 
