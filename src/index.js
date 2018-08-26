@@ -4,9 +4,9 @@ const dotenv = require('dotenv');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-const assign = x => y => Object.assign({}, x, y);
-const when = (condition, fn) => x => condition ? fn(x) : x;
 const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+const when = (condition, fn) => x => condition ? fn(x) : x;
+const assign = x => y => Object.assign({}, x, y);
 
 const only = from => object => Object.keys(object).reduce(
   (acc, key) => assign(acc)({ [key]: from[key] || acc[key] }),
@@ -30,14 +30,15 @@ function config({
   ],
 } = {}) {
   const resolve = file => path.resolve(context, file);
-  const exists = file => file && fs.existsSync(resolve(file));
+  const exists = file => file && pipe(resolve, fs.existsSync)(file);
+  const parse = file => pipe(resolve, fs.readFileSync, dotenv.parse)(file);
 
   const read = file => object => exists(file)
-    ? pipe(resolve, fs.readFileSync, dotenv.parse, assign(object))(file)
+    ? pipe(parse, assign(object))(file)
     : object;
 
   const filter = file => object => {
-    const names = pipe(read(file), Object.keys)({});
+    const names = pipe(parse, Object.keys)(file);
 
     return names.reduce(
       (acc, name) => assign(acc)({ [name]: object[name] }),
