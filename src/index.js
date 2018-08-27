@@ -7,27 +7,40 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
 const when = (condition, fn) => x => condition ? fn(x) : x;
 const assign = x => y => Object.assign({}, x, y);
+const reduce = (fn, x) => y => y.reduce(fn, x);
 
-const only = from => object => Object.keys(object).reduce(
-  (acc, key) => assign(acc)({ [key]: from[key] || acc[key] }),
-  object,
-);
+const only = x => y => {
+  const reducer = (acc, key) => assign(acc)({ [key]: x[key] || acc[key] });
 
-const toArray = value => Array.isArray(value)
-  ? value
-  : String(value).trim().split(/\s*,\s*/);
+  return pipe(
+    Object.keys,
+    reduce(reducer, y),
+  )(y);
+};
+
+const toArray = x => Array.isArray(x)
+  ? x
+  : String(x).trim().split(/\s*,\s*/);
 
 const interpolate = defaults => object => {
   const capture = value => String(value || '').match(/\$\{(\w+)\}/g) || [];
-  const substitute = value => variables => capture(value).reduce(
-    (val, name) => val.replace(name, variables[name.slice(2, -1)] || ''),
-    value,
-  );
+  const substitute = value => variables => {
+    const reducer = (val, key) => val.replace(key, variables[key.slice(2, -1)] || '');
 
-  return Object.entries(object).reduce(
-    (acc, [key, value]) => assign(acc)({ [key]: pipe(assign(defaults), substitute(value))(acc) }),
-    {},
-  );
+    return pipe(
+      capture,
+      reduce(reducer, value),
+    )(value);
+  };
+
+  const reducer = (acc, [key, value]) => assign(acc)({
+    [key]: pipe(assign(defaults), substitute(value))(acc),
+  });
+
+  return pipe(
+    Object.entries,
+    reduce(reducer, {}),
+  )(object);
 };
 
 function config({
@@ -48,12 +61,13 @@ function config({
   const read = file => when(exists(file), object => pipe(parse, assign(object))(file));
 
   const filter = file => object => {
-    const keys = pipe(parse, Object.keys)(file);
+    const reducer = (acc, key) => assign(acc)({ [key]: object[key] });
 
-    return keys.reduce(
-      (acc, key) => assign(acc)({ [key]: object[key] }),
-      {},
-    );
+    return pipe(
+      parse,
+      Object.keys,
+      reduce(reducer, {}),
+    )(file);
   };
 
   return pipe(
