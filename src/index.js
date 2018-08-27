@@ -17,22 +17,22 @@ const toArray = value => Array.isArray(value)
   ? value
   : String(value).trim().split(/\s*,\s*/);
 
-const substitute = object => {
-  const regex = new RegExp(/(?:\$\{)(\w+)(?:\})/);
-  const replace = value => {
-    let newVal = value;
+const interpolate = defaults => object => {
+  const substitute = value => variables => {
+    const captures = String(value || '').match(/\$\{(\w+)\}/g);
 
-    while (regex.test(newVal)) {
-      const [pattern, name] = regex.exec(newVal);
-      const substitution = object[name] || process.env[name] || '';
-      newVal = newVal.replace(pattern, substitution);
-    };
+    if (!Array.isArray(captures)) {
+      return value;
+    }
 
-    return newVal;
+    return captures.reduce(
+      (val, name) => val.replace(name, variables[name.slice(2, -1)] || ''),
+      value,
+    );
   };
 
   return Object.entries(object).reduce(
-    (acc, [key, value]) => assign(acc)({ [key]: replace(value) }),
+    (acc, [key, value]) => assign(acc)({ [key]: pipe(assign(defaults), substitute(value))(acc) }),
     {},
   );
 };
@@ -68,7 +68,7 @@ function config({
     ...toArray(files).map(file => when(exists(file), read(file))),
     when(exists(schema), filter(schema)),
     when(system, only(process.env)),
-    substitute,
+    interpolate(system ? process.env : {}),
   )({});
 }
 

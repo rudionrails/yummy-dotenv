@@ -194,13 +194,15 @@ describe('options.files', () => {
 });
 
 describe('variable substitution', () => {
+  beforeEach(() => {
+    process.env.XYZ = 'XYZ-process-env';
+  });
+
   afterEach(() => {
     delete process.env.XYZ;
   });
 
-  test('to substitute correctly', () => {
-    process.env.XYZ = 'XYZ-process-env';
-
+  test('to substitute correctly when system vars are enabled', () => {
     const env = dotenv.config({
       ...options,
       defaults: false,
@@ -210,9 +212,26 @@ describe('variable substitution', () => {
 
     expect(env).toEqual({
       FOO: 'foo-env',
-      BAR: 'foo-env@baz-env/XYZ-process-env',
+      BAR: 'foo-env@/XYZ-process-env',
       BAZ: 'baz-env',
-      ABC: '',
+      ABC: '$NOOP/',
+    });
+  });
+
+  test('to substitute correctly when system vars are disabled', () => {
+    const env = dotenv.config({
+      ...options,
+      defaults: false,
+      schema: false,
+      system: false,
+      files: '.env.variables',
+    });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAR: 'foo-env@/',
+      BAZ: 'baz-env',
+      ABC: '$NOOP/',
     });
   });
 });
