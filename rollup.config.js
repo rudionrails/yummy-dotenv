@@ -16,7 +16,7 @@ export default [
     input: 'src/index.js',
     output: [
       { file: main, format: 'cjs' },
-      { file: module, format: 'esm' }
+      { file: module, format: 'esm' },
     ],
     plugins,
     external,
@@ -25,7 +25,7 @@ export default [
     input: 'src/config.js',
     output: [
       { file: 'dist/config.js', format: 'cjs' },
-      { file: 'dist/config.m.js', format: 'esm' }
+      { file: 'dist/config.m.js', format: 'esm' },
     ],
     plugins,
     external,

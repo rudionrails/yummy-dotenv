@@ -8,4 +8,8 @@ module.exports = {
     'import',
     'jest',
   ],
+
+  'rules': {
+    'arrow-parens': ['error', 'as-needed'],
+  },
 };

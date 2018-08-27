@@ -30,7 +30,7 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint . --ignore-path .gitignore",
-    "prebuild": "rm -rf ./dist",
+    "prebuild": "rm -rf ./dist && npm run lint && npm test",
     "prepublishOnly": "npm run build",
     "test": "jest"
   },

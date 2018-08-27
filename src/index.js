@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
-const when = (condition, fn) => x => condition ? fn(x) : x;
+const when = (condition, fn) => x => (condition ? fn(x) : x);
 const assign = x => y => Object.assign({}, x, y);
 const reduce = (fn, x) => y => y.reduce(fn, x);
 
@@ -18,9 +18,11 @@ const only = x => y => {
   )(y);
 };
 
-const toArray = x => Array.isArray(x)
-  ? x
-  : String(x).trim().split(/\s*,\s*/);
+const toArray = x => (
+  Array.isArray(x)
+    ? x
+    : String(x).trim().split(/\s*,\s*/)
+);
 
 const interpolate = defaults => object => {
   const capture = value => String(value || '').match(/\$\{(\w+)\}/g) || [];
