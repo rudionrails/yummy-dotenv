@@ -18,18 +18,11 @@ const toArray = value => Array.isArray(value)
   : String(value).trim().split(/\s*,\s*/);
 
 const interpolate = defaults => object => {
-  const substitute = value => variables => {
-    const captures = String(value || '').match(/\$\{(\w+)\}/g);
-
-    if (!Array.isArray(captures)) {
-      return value;
-    }
-
-    return captures.reduce(
-      (val, name) => val.replace(name, variables[name.slice(2, -1)] || ''),
-      value,
-    );
-  };
+  const capture = value => String(value || '').match(/\$\{(\w+)\}/g) || [];
+  const substitute = value => variables => capture(value).reduce(
+    (val, name) => val.replace(name, variables[name.slice(2, -1)] || ''),
+    value,
+  );
 
   return Object.entries(object).reduce(
     (acc, [key, value]) => assign(acc)({ [key]: pipe(assign(defaults), substitute(value))(acc) }),
