@@ -2,14 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const nodeEnv = () => process.env.NODE_ENV || 'development';
+const isDev = () => nodeEnv() === 'development';
 
-const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
-const when = (condition, fn) => x => (condition ? fn(x) : x);
-const assign = x => y => Object.assign({}, x, y);
-const reduce = (fn, x) => y => y.reduce(fn, x);
+const isFunction = /* #__PURE__ */ predicate => typeof predicate === 'function';
+const pipe = /* #__PURE__ */ (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+const when = /* #__PURE__ */ (condition, fn) => x => (condition ? fn(x) : x);
+const reduce = /* #__PURE__ */ (fn, x) => y => y.reduce(fn, x);
+const assign = /* #__PURE__ */ x => y => Object.assign({}, x, y);
 
-const only = x => y => {
+const only = /* #__PURE__ */ x => y => {
   const reducer = (acc, key) => assign(acc)({ [key]: x[key] || acc[key] });
 
   return pipe(
@@ -18,13 +20,28 @@ const only = x => y => {
   )(y);
 };
 
-const toArray = x => (
+const toArray = /* #__PURE__ */ x => (
   Array.isArray(x)
     ? x
     : String(x).trim().split(/\s*,\s*/)
 );
 
-const interpolate = defaults => object => {
+// const mapFiles = filesOrFn => toArray(
+//   isFunction(filesOrFn) ? filesOrFn() : filesOrFn,
+// ).map;
+
+const mapFiles = filesOrFn => mapFn => {
+  const files = pipe(
+    maybeFn => (isFunction(maybeFn) ? maybeFn() : maybeFn),
+    toArray,
+    list => list.filter(Boolean),
+  )(filesOrFn);
+
+  return files.map(mapFn);
+};
+
+
+const interpolate = /* #__PURE__ */ defaults => object => {
   const capture = value => String(value || '').match(/\$\{(\w+)\}/g) || [];
   const substitute = value => variables => {
     const reducer = (val, key) => val.replace(key, variables[key.slice(2, -1)] || '');
@@ -46,15 +63,15 @@ const interpolate = defaults => object => {
 };
 
 function config({
-  context = path.resolve(process.cwd()),
+  context = process.cwd(),
   defaults = '.env.defaults',
   schema = '.env.schema',
   system = true,
-  files = [
+  files = () => [
     '.env',
-    '.env.local',
-    `.env.${NODE_ENV}`,
-    `.env.${NODE_ENV}.local`,
+    isDev() && '.env.local',
+    `.env.${nodeEnv()}`,
+    isDev() && `.env.${nodeEnv()}.local`,
   ],
 } = {}) {
   const resolve = file => path.resolve(context, file);
@@ -74,7 +91,9 @@ function config({
 
   return pipe(
     when(exists(defaults), read(defaults)),
-    ...toArray(files).map(file => when(exists(file), read(file))),
+    ...mapFiles(files)(
+      file => when(exists(file), read(file)),
+    ),
     when(exists(schema), filter(schema)),
     when(system, only(process.env)),
     interpolate(system ? process.env : {}),

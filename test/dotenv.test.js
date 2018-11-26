@@ -3,16 +3,22 @@ const path = require('path');
 // module under test
 const dotenv = require('../src/index');
 
+const NODE_ENV = process.env.NODE_ENV;
 const options = {
   context: path.resolve(__dirname, 'fixtures'),
 };
+
+afterEach(() => {
+  Object.assign(process.env, { NODE_ENV });
+});
+
 
 test('to read from the context dir', () => {
   const env = dotenv.config(options);
 
   expect(env).toEqual({
     FOO: 'foo-env',
-    BAZ: 'baz-env-local',
+    BAZ: undefined,
     XYZ: undefined,
   });
 });
@@ -26,7 +32,7 @@ describe('options.defaults', () => {
 
     expect(env).toEqual({
       FOO: 'foo-env',
-      BAZ: 'baz-env-local',
+      BAZ: undefined,
       XYZ: undefined,
     });
   });
@@ -39,7 +45,7 @@ describe('options.defaults', () => {
 
     expect(env).toEqual({
       FOO: 'foo-env',
-      BAZ: 'baz-env-local',
+      BAZ: undefined,
       XYZ: undefined,
     });
   });
@@ -52,7 +58,7 @@ describe('options.defaults', () => {
 
     expect(env).toEqual({
       FOO: 'foo-env',
-      BAZ: 'baz-env-local',
+      BAZ: undefined,
       XYZ: 'xyz-defaults-manual',
     });
   });
@@ -74,7 +80,7 @@ describe('options.systen', () => {
 
     expect(env).toEqual({
       FOO: 'foo-process-env',
-      BAZ: 'baz-env-local',
+      BAZ: undefined,
       XYZ: 'xyz-process-env',
     });
   });
@@ -87,7 +93,7 @@ describe('options.systen', () => {
 
     expect(env).toEqual({
       FOO: 'foo-env',
-      BAZ: 'baz-env-local',
+      BAZ: undefined,
       XYZ: undefined,
     });
   });
@@ -104,7 +110,6 @@ describe('options.schema', () => {
       ABC: 'abc-env',
       FOO: 'foo-env',
       BAR: 'bar-defaults',
-      BAZ: 'baz-env-local',
     });
   });
 
@@ -118,7 +123,6 @@ describe('options.schema', () => {
       ABC: 'abc-env',
       FOO: 'foo-env',
       BAR: 'bar-defaults',
-      BAZ: 'baz-env-local',
     });
   });
 
@@ -184,6 +188,22 @@ describe('options.files', () => {
       ...options,
       files: '.env, .env.local',
     });
+
+    expect(env).toEqual({
+      FOO: 'foo-env',
+      BAZ: 'baz-env-local',
+      XYZ: undefined,
+    });
+  });
+});
+
+describe('when NODE_ENV === "development"', () => {
+  beforeEach(() => {
+    Object.assign(process.env, { NODE_ENV: 'development' });
+  });
+
+  test('to read .env.local and .env.{NODE_ENV}.local when "development" (default)', () => {
+    const env = dotenv.config(options);
 
     expect(env).toEqual({
       FOO: 'foo-env',
