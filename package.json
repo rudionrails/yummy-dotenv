@@ -35,16 +35,16 @@
     "test": "jest"
   },
   "dependencies": {
-    "dotenv": "^6.0.0"
+    "dotenv": "^6.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.4.0",
+    "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.22.0",
-    "jest": "^23.5.0",
+    "eslint-plugin-jest": "^21.27.2",
+    "jest": "^23.6.0",
     "rollup": "^0.64.1",
-    "rollup-plugin-commonjs": "^9.1.5",
-    "rollup-plugin-node-resolve": "^3.3.0"
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^3.4.0"
   }
 }
