@@ -3,7 +3,7 @@ const path = require('path');
 // module under test
 const dotenv = require('../src/index');
 
-const NODE_ENV = process.env.NODE_ENV;
+const { NODE_ENV } = process.env;
 const options = {
   context: path.resolve(__dirname, 'fixtures'),
 };
