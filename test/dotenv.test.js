@@ -255,3 +255,15 @@ describe('variable substitution', () => {
     });
   });
 });
+
+test('to default node environment to production', () => {
+  delete process.env.NODE_ENV;
+
+  const env = dotenv.config(options);
+
+  expect(env).toEqual({
+    FOO: 'foo-env',
+    BAZ: 'baz-env-production',
+    XYZ: undefined,
+  });
+});

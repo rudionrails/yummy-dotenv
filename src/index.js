@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-const nodeEnv = () => process.env.NODE_ENV || 'development';
+const nodeEnv = () => process.env.NODE_ENV || 'production';
 const isDev = () => nodeEnv() === 'development';
 
 const isFunction = /* #__PURE__ */ predicate => typeof predicate === 'function';
