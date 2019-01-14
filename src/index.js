@@ -72,7 +72,7 @@ function config({
     isDev() && '.env.local',
     `.env.${nodeEnv()}`,
     isDev() && `.env.${nodeEnv()}.local`,
-  ],
+  ].filter(Boolean),
 } = {}) {
   const resolve = file => path.resolve(context, file);
   const exists = file => file && pipe(resolve, fs.existsSync)(file);
