@@ -12,14 +12,11 @@ const when = /* #__PURE__ */ (conditionFn, fn) => x =>
 const reduce = /* #__PURE__ */ (fn, x) => y => y.reduce(fn, x);
 const assign = /* #__PURE__ */ x => y => Object.assign({}, x, y);
 
-const only = /* #__PURE__ */ x => y => {
-  const reducer = (acc, key) => assign(acc)({ [key]: x[key] || acc[key] });
-
-  return pipe(
-    Object.keys,
-    reduce(reducer, y)
-  )(y);
-};
+const only = /* #__PURE__ */ x => y =>
+  Object.keys(y).reduce(
+    (acc, key) => assign(acc)({ [key]: x[key] || acc[key] }),
+    y,
+  );
 
 const toArray = /* #__PURE__ */ x =>
   Array.isArray(x)
@@ -36,22 +33,20 @@ const interpolate = /* #__PURE__ */ defaults => object => {
 
     return pipe(
       capture,
-      reduce(reducer, value)
+      reduce(reducer, value),
     )(value);
   };
 
-  const reducer = (acc, [key, value]) =>
-    assign(acc)({
-      [key]: pipe(
-        assign(defaults),
-        substitute(value)
-      )(acc),
-    });
-
-  return pipe(
-    Object.entries,
-    reduce(reducer, {})
-  )(object);
+  return Object.entries(object).reduce(
+    (acc, [key, value]) =>
+      assign(acc)({
+        [key]: pipe(
+          assign(defaults),
+          substitute(value),
+        )(acc),
+      }),
+    {},
+  );
 };
 
 function config({
@@ -72,13 +67,13 @@ function config({
     file &&
     pipe(
       resolve,
-      fs.existsSync
+      fs.existsSync,
     )(file);
   const parse = file =>
     pipe(
       resolve,
       fs.readFileSync,
-      dotenv.parse
+      dotenv.parse,
     )(file);
   const read = file =>
     when(
@@ -86,8 +81,8 @@ function config({
       object =>
         pipe(
           parse,
-          assign(object)
-        )(file)
+          assign(object),
+        )(file),
     );
   const readList = filesOrFn => object => {
     const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
@@ -97,22 +92,19 @@ function config({
       .reduce((acc, file) => read(file)(acc), object);
   };
 
-  const filter = file => object => {
-    const reducer = (acc, key) => assign(acc)({ [key]: object[key] });
-
-    return pipe(
+  const filter = file => object =>
+    pipe(
       parse,
       Object.keys,
-      reduce(reducer, {})
+      reduce((acc, key) => assign(acc)({ [key]: object[key] }), {}),
     )(file);
-  };
 
   return pipe(
     when(() => exists(defaults), read(defaults)),
     readList(files),
     when(() => exists(schema), filter(schema)),
     when(() => system, only(process.env)),
-    interpolate(system ? process.env : {})
+    interpolate(system ? process.env : {}),
   )({});
 }
 
