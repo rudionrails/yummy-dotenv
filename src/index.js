@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 const nodeEnv = () => process.env.NODE_ENV || "development";
 const isDev = () => nodeEnv() === "development";
 
-const isFunction = /* #__PURE__ */ predicate => typeof predicate === "function";
 const pipe = /* #__PURE__ */ (...fns) => x =>
   fns.reduce((acc, fn) => fn(acc), x);
 const when = /* #__PURE__ */ (conditionFn, fn) => x =>
@@ -28,20 +27,6 @@ const toArray = /* #__PURE__ */ x =>
     : String(x)
         .trim()
         .split(/\s*,\s*/);
-
-// const mapFiles = filesOrFn => toArray(
-//   isFunction(filesOrFn) ? filesOrFn() : filesOrFn,
-// ).map;
-
-const mapFiles = filesOrFn => mapFn => {
-  const files = pipe(
-    maybeFn => (isFunction(maybeFn) ? maybeFn() : maybeFn),
-    toArray,
-    list => list.filter(Boolean)
-  )(filesOrFn);
-
-  return files.map(mapFn);
-};
 
 const interpolate = /* #__PURE__ */ defaults => object => {
   const capture = value => String(value || "").match(/\$\{(\w+)\}/g) || [];
@@ -104,6 +89,13 @@ function config({
           assign(object)
         )(file)
     );
+  const readList = filesOrFn => object => {
+    const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
+
+    return toArray(files)
+      .filter(Boolean)
+      .reduce((acc, file) => read(file)(acc), object);
+  };
 
   const filter = file => object => {
     const reducer = (acc, key) => assign(acc)({ [key]: object[key] });
@@ -117,7 +109,7 @@ function config({
 
   return pipe(
     when(() => exists(defaults), read(defaults)),
-    ...mapFiles(files)(file => when(() => exists(file), read(file))),
+    readList(files),
     when(() => exists(schema), filter(schema)),
     when(() => system, only(process.env)),
     interpolate(system ? process.env : {})
