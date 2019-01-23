@@ -49,6 +49,32 @@ const interpolate = /* #__PURE__ */ defaults => object => {
   );
 };
 
+const exists = (context, file) =>
+  file && fs.existsSync(path.resolve(context, file));
+
+const parse = context => file => {
+  const content = fs.readFileSync(path.resolve(context, file));
+  return dotenv.parse(content);
+};
+
+const read = (context, file) =>
+  when(
+    () => exists(context, file),
+    object =>
+      pipe(
+        parse(context),
+        assign(object),
+      )(file),
+  );
+
+const readList = (context, filesOrFn) => object => {
+  const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
+
+  return toArray(files)
+    .filter(Boolean)
+    .reduce((acc, file) => read(context, file)(acc), object);
+};
+
 function config({
   context = process.cwd(),
   defaults = ".env.defaults",
@@ -63,46 +89,17 @@ function config({
     ].filter(Boolean),
 } = {}) {
   const resolve = file => path.resolve(context, file);
-  const exists = file =>
-    file &&
-    pipe(
-      resolve,
-      fs.existsSync,
-    )(file);
-  const parse = file =>
-    pipe(
-      resolve,
-      fs.readFileSync,
-      dotenv.parse,
-    )(file);
-  const read = file =>
-    when(
-      () => exists(file),
-      object =>
-        pipe(
-          parse,
-          assign(object),
-        )(file),
-    );
-  const readList = filesOrFn => object => {
-    const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
-
-    return toArray(files)
-      .filter(Boolean)
-      .reduce((acc, file) => read(file)(acc), object);
-  };
-
   const filter = file => object =>
     pipe(
-      parse,
+      parse(context),
       Object.keys,
       reduce((acc, key) => assign(acc)({ [key]: object[key] }), {}),
     )(file);
 
   return pipe(
-    when(() => exists(defaults), read(defaults)),
-    readList(files),
-    when(() => exists(schema), filter(schema)),
+    when(() => exists(context, defaults), read(context, defaults)),
+    readList(context, files),
+    when(() => exists(context, schema), filter(schema)),
     when(() => system, only(process.env)),
     interpolate(system ? process.env : {}),
   )({});
