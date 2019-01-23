@@ -57,15 +57,15 @@ const parse = context => file => {
   return dotenv.parse(content);
 };
 
-const read = (context, file) =>
+const read = (context, file) => object =>
   when(
     () => exists(context, file),
-    object =>
+    obj =>
       pipe(
         parse(context),
-        assign(object),
+        assign(obj),
       )(file),
-  );
+  )(object);
 
 const readList = (context, filesOrFn) => object => {
   const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
@@ -73,6 +73,15 @@ const readList = (context, filesOrFn) => object => {
   return toArray(files)
     .filter(Boolean)
     .reduce((acc, file) => read(context, file)(acc), object);
+};
+
+const filter = (context, file) => object => {
+  const content = parse(context)(file);
+
+  return Object.keys(content).reduce(
+    (acc, key) => assign(acc)({ [key]: object[key] }),
+    {},
+  );
 };
 
 function config({
@@ -88,18 +97,10 @@ function config({
       isDev() && `.env.${nodeEnv()}.local`,
     ].filter(Boolean),
 } = {}) {
-  const resolve = file => path.resolve(context, file);
-  const filter = file => object =>
-    pipe(
-      parse(context),
-      Object.keys,
-      reduce((acc, key) => assign(acc)({ [key]: object[key] }), {}),
-    )(file);
-
   return pipe(
     when(() => exists(context, defaults), read(context, defaults)),
     readList(context, files),
-    when(() => exists(context, schema), filter(schema)),
+    when(() => exists(context, schema), filter(context, schema)),
     when(() => system, only(process.env)),
     interpolate(system ? process.env : {}),
   )({});
