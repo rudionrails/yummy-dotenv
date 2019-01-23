@@ -1,90 +1,19 @@
-const fs = require("fs");
-const path = require("path");
 const dotenv = require("dotenv");
+const {
+  pipe,
+  when,
+  exists,
+  read,
+  readList,
+  filter,
+  only,
+  interpolate,
+} = require("./utils");
 
 const nodeEnv = () => process.env.NODE_ENV || "development";
 const isDev = () => nodeEnv() === "development";
 
-const pipe = /* #__PURE__ */ (...fns) => x =>
-  fns.reduce((acc, fn) => fn(acc), x);
-const when = /* #__PURE__ */ (conditionFn, fn) => x =>
-  conditionFn(x) ? fn(x) : x;
-const reduce = /* #__PURE__ */ (fn, x) => y => y.reduce(fn, x);
-const assign = /* #__PURE__ */ x => y => Object.assign({}, x, y);
-
-const only = /* #__PURE__ */ x => y =>
-  Object.keys(y).reduce(
-    (acc, key) => assign(acc)({ [key]: x[key] || acc[key] }),
-    y,
-  );
-
-const toArray = /* #__PURE__ */ x =>
-  Array.isArray(x)
-    ? x
-    : String(x)
-        .trim()
-        .split(/\s*,\s*/);
-
-const interpolate = /* #__PURE__ */ defaults => object => {
-  const capture = value => String(value || "").match(/\$\{(\w+)\}/g) || [];
-  const substitute = value => variables => {
-    const reducer = (val, key) =>
-      val.replace(key, variables[key.slice(2, -1)] || "");
-
-    return pipe(
-      capture,
-      reduce(reducer, value),
-    )(value);
-  };
-
-  return Object.entries(object).reduce(
-    (acc, [key, value]) =>
-      assign(acc)({
-        [key]: pipe(
-          assign(defaults),
-          substitute(value),
-        )(acc),
-      }),
-    {},
-  );
-};
-
-const exists = (context, file) =>
-  file && fs.existsSync(path.resolve(context, file));
-
-const parse = context => file => {
-  const content = fs.readFileSync(path.resolve(context, file));
-  return dotenv.parse(content);
-};
-
-const read = (context, file) => object =>
-  when(
-    () => exists(context, file),
-    obj =>
-      pipe(
-        parse(context),
-        assign(obj),
-      )(file),
-  )(object);
-
-const readList = (context, filesOrFn) => object => {
-  const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
-
-  return toArray(files)
-    .filter(Boolean)
-    .reduce((acc, file) => read(context, file)(acc), object);
-};
-
-const filter = (context, file) => object => {
-  const content = parse(context)(file);
-
-  return Object.keys(content).reduce(
-    (acc, key) => assign(acc)({ [key]: object[key] }),
-    {},
-  );
-};
-
-function config({
+const config = ({
   context = process.cwd(),
   defaults = ".env.defaults",
   schema = ".env.schema",
@@ -96,15 +25,19 @@ function config({
       `.env.${nodeEnv()}`,
       isDev() && `.env.${nodeEnv()}.local`,
     ].filter(Boolean),
-} = {}) {
-  return pipe(
+} = {}) =>
+  pipe(
+    // read the defaults
     when(() => exists(context, defaults), read(context, defaults)),
+    // the content of the regular files
     readList(context, files),
+    // reduce the key-value pairs down to what is efined in the schema
     when(() => exists(context, schema), filter(context, schema)),
+    // allow system variables to take precedence
     when(() => system, only(process.env)),
+    // simple parameter expansion / interpolation
     interpolate(system ? process.env : {}),
   )({});
-}
 
 module.exports = {
   parse: dotenv.parse,
