@@ -209,11 +209,11 @@ describe('when NODE_ENV === "development"', () => {
 
 describe("variable substitution", () => {
   beforeEach(() => {
-    process.env.XYZ = "XYZ-process-env";
+    process.env.DEF = "DEF-process-env";
   });
 
   afterEach(() => {
-    delete process.env.XYZ;
+    delete process.env.DEF;
   });
 
   test("to substitute correctly when system vars are enabled", () => {
@@ -226,7 +226,7 @@ describe("variable substitution", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAR: "foo-env@/XYZ-process-env",
+      BAR: "foo-env@/DEF-process-env",
       BAZ: "baz-env",
       ABC: "$NOOP/",
     });
