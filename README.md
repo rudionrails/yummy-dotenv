@@ -4,13 +4,13 @@
 
 This opinionated dotenv library makes some assumptions based on available `.env`-files. Unless configured otherwise, the following load order applies as follows:
 
-* `.env.defaults`
-* `.env`
-* `.env.local`
-* `.env.${NODE_ENV}`
-* `.env.${NODE_ENV}.local`
-* `.env.schema`
-* `process.env`
+- `.env.defaults`
+- `.env`
+- `.env.local`
+- `.env.${NODE_ENV}`
+- `.env.${NODE_ENV}.local`
+- `.env.schema`
+- `process.env`
 
 The default options used are as follows:
 
@@ -40,17 +40,22 @@ const env = dotenv.config({
 
 ### .env.defaults
 
-Use this to provide your dotenv config with some default values. Values defined in later files or `process.env` will override those. If your project does not have this file, then it will be ignored. You can also configure it to disable it explicitly or point it to another defaults file.
+Use this to provide your dotenv config with some default values. Values defined in later files or `process.env` will override those. If your project does not have this file, then it will be ignored. You can also configure it to disable it explicitly or point it to another defaults file. Alternatively, you may pass an object to defaults.
 
 ```javascript
 // the default value
-const env = dotenv.config({ defaults: '.env.defaults' })
+const env = dotenv.config({ defaults: ".env.defaults" });
 
 // point to a different file
-const env = dotenv.config({ defaults: '/<path>/<to>/.env.defaults' })
+const env = dotenv.config({ defaults: "/<path>/<to>/.env.defaults" });
 
 // disable it explicitly
 const env = dotenv.config({ defaults: false });
+
+// pass as object, which will NOT attempt to read from file
+const env = dotenv.config({
+  defaults: { FOO: "default FOO value" },
+});
 ```
 
 The behaviour is as follows:
@@ -65,7 +70,6 @@ The behaviour is as follows:
 
 const env = dotenv.config();
 // => { FOO: 'foo from .env', BAR: 'default bar' }
-
 ```
 
 ### .env.schema
@@ -74,10 +78,10 @@ You may wish to limit your dotenv variables to specific keys only. This is usefu
 
 ```javascript
 // the default value
-const env = dotenv.config({ schema: '.env.schema' })
+const env = dotenv.config({ schema: ".env.schema" });
 
 // point to a different file
-const env = dotenv.config({ schema: '/<path>/<to>/.env.schema' })
+const env = dotenv.config({ schema: "/<path>/<to>/.env.schema" });
 
 // disable it explicitly
 const env = dotenv.config({ schema: false });
@@ -94,7 +98,7 @@ The behaviour is as follows:
 // BAR='bar from .env'
 
 const env = dotenv.config();
-// => { FOO: 'foo from .env' 
+// => { FOO: 'foo from .env'
 ```
 
 ### process.env (system variables)
@@ -134,6 +138,6 @@ You can also configure the list of `.env`-files to read. The order of which also
 // $ .env.custom
 // FOO='foo from custom env'
 
-const env = dotenv.config({ files: ['.env', '.env.custom'] });
+const env = dotenv.config({ files: [".env", ".env.custom"] });
 // => { FOO: 'foo from custom env' }
 ```

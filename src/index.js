@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const nodeEnv = () => process.env.NODE_ENV || "development";
 const isDev = () => nodeEnv() === "development";
 
+const isString = /* #__PURE__ */ x => typeof x === "string";
+const isObject = /* #__PURE__ */ x => typeof x === "object";
 const pipe = /* #__PURE__ */ (...fns) => x =>
   fns.reduce((acc, fn) => fn(acc), x);
 const when = /* #__PURE__ */ (conditionFn, fn) => x =>
@@ -20,7 +22,6 @@ const only = /* #__PURE__ */ x => y => {
     reduce(reducer, y),
   )(y);
 };
-
 const toArray = /* #__PURE__ */ x =>
   Array.isArray(x)
     ? x
@@ -53,7 +54,7 @@ const interpolate = /* #__PURE__ */ defaults => object => {
 };
 
 const exists = (context, file) =>
-  file && fs.existsSync(path.resolve(context, file));
+  isString(file) && fs.existsSync(path.resolve(context, file));
 
 const parse = (context, file) =>
   pipe(
@@ -109,7 +110,7 @@ const config = ({
     when(() => system, only(process.env)),
     // simple parameter expansion / interpolation
     interpolate(system ? process.env : {}),
-  )({});
+  )(isObject(defaults) ? defaults : {});
 
 module.exports = {
   parse: dotenv.parse,

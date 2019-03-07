@@ -61,6 +61,21 @@ describe("options.defaults", () => {
       XYZ: "xyz-defaults-manual",
     });
   });
+
+  test("to allow object", () => {
+    const env = dotenv.config({
+      ...options,
+      defaults: {
+        XYZ: "xyz-defaults-object",
+      },
+    });
+
+    expect(env).toEqual({
+      FOO: "foo-env",
+      BAZ: undefined,
+      XYZ: "xyz-defaults-object",
+    });
+  });
 });
 
 describe("options.systen", () => {
@@ -207,7 +222,7 @@ describe('when NODE_ENV === "development"', () => {
   });
 });
 
-describe("variable substitution", () => {
+describe("variable substitution / interpolation", () => {
   beforeEach(() => {
     process.env.DEF = "DEF-process-env";
   });
