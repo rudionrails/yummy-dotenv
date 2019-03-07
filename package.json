@@ -1,6 +1,6 @@
 {
   "name": "@yummy/dotenv",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "A yummy dotenv library",
   "main": "dist/dotenv.js",
   "module": "dist/dotenv.m.js",
@@ -30,6 +30,7 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint . --ignore-path .gitignore",
+    "postversion": "git push --tags && yarn publish . --tag $npm_package_version && git push && echo \"Successfully released version $npm_package_version!\"",
     "prebuild": "rm -rf ./dist && npm run lint && npm test",
     "prepublishOnly": "npm run build",
     "test": "jest"
