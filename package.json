@@ -39,15 +39,15 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
     "eslint-config-prettier": "^4.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "22",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-jest": "^22.7.2",
     "eslint-plugin-prettier": "^3.0.1",
     "jest": "24",
-    "prettier": "^1.16.4",
+    "prettier": "^1.18.2",
     "rollup": "1.2",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-node-resolve": "4.0"
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.4"
   }
 }
