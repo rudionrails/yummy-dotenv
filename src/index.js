@@ -49,7 +49,7 @@ const interpolate = /* #__PURE__ */ defaults => object => {
           substitute(value),
         )(acc),
       }),
-    {},
+    object,
   );
 };
 
@@ -64,10 +64,9 @@ const parse = (context, file) =>
   )(file);
 
 const read = (context, file) => object =>
-  when(
-    () => exists(context, file),
-    obj => mergeRight(obj)(parse(context, file)),
-  )(object);
+  when(() => exists(context, file), x => mergeRight(x)(parse(context, file)))(
+    object,
+  );
 
 const readList = (context, filesOrFn) => object => {
   const files = typeof filesOrFn === "function" ? filesOrFn() : filesOrFn;
@@ -100,8 +99,12 @@ const config = ({
     ].filter(Boolean),
 } = {}) =>
   pipe(
-    // read the defaults
-    when(() => exists(context, defaults), read(context, defaults)),
+    // read the defaults or sued the passed Object
+    when(
+      () => isString(defaults) && exists(context, defaults),
+      read(context, defaults),
+    ),
+    when(() => isObject(defaults), () => defaults),
     // the content of the regular files
     readList(context, files),
     // reduce the key-value pairs down to what is efined in the schema
@@ -110,7 +113,7 @@ const config = ({
     when(() => system, only(process.env)),
     // simple parameter expansion / interpolation
     interpolate(system ? process.env : {}),
-  )(isObject(defaults) ? defaults : {});
+  )({});
 
 module.exports = {
   parse: dotenv.parse,

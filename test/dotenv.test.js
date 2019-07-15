@@ -6,6 +6,9 @@ const dotenv = require("../src/index");
 const { NODE_ENV } = process.env;
 const options = {
   context: path.resolve(__dirname, "fixtures"),
+  schema: false,
+  defaults: false,
+  system: false,
 };
 
 afterEach(() => {
@@ -17,8 +20,7 @@ test("to read from the context dir", () => {
 
   expect(env).toEqual({
     FOO: "foo-env",
-    BAZ: undefined,
-    XYZ: undefined,
+    ABC: "abc-env",
   });
 });
 
@@ -31,8 +33,7 @@ describe("options.defaults", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
-      XYZ: undefined,
+      ABC: "abc-env",
     });
   });
 
@@ -44,12 +45,11 @@ describe("options.defaults", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
-      XYZ: undefined,
+      ABC: "abc-env",
     });
   });
 
-  test("to allow override", () => {
+  test("to allow filename", () => {
     const env = dotenv.config({
       ...options,
       defaults: ".env.defaults-manual",
@@ -57,7 +57,7 @@ describe("options.defaults", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
+      ABC: "abc-env",
       XYZ: "xyz-defaults-manual",
     });
   });
@@ -66,13 +66,17 @@ describe("options.defaults", () => {
     const env = dotenv.config({
       ...options,
       defaults: {
+        BAR: "BAR/${XYZ}", // eslint-disable-line no-template-curly-in-string
+        BAZ: "${BAR}/BAZ/${ABC}", // eslint-disable-line no-template-curly-in-string
         XYZ: "xyz-defaults-object",
       },
     });
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
+      BAR: "BAR/xyz-defaults-object",
+      BAZ: "BAR/xyz-defaults-object/BAZ/abc-env",
+      ABC: "abc-env",
       XYZ: "xyz-defaults-object",
     });
   });
@@ -87,19 +91,20 @@ describe("options.systen", () => {
 
   test("to read system variables", () => {
     process.env.FOO = "foo-process-env";
-    process.env.ABC = "abc-process-env"; // to be ignored
-    process.env.XYZ = "xyz-process-env";
+    process.env.ABC = "abc-process-env";
+    process.env.XYZ = "xyz-process-env"; // to be ignored
 
-    const env = dotenv.config(options);
+    const env = dotenv.config({ ...options, system: true });
 
     expect(env).toEqual({
       FOO: "foo-process-env",
-      BAZ: undefined,
-      XYZ: "xyz-process-env",
+      ABC: "abc-process-env",
     });
   });
 
   test("to be ignored when false", () => {
+    process.env.ABC = "abc-process-env"; // to be ignored
+
     const env = dotenv.config({
       ...options,
       system: false,
@@ -107,8 +112,7 @@ describe("options.systen", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
-      XYZ: undefined,
+      ABC: "abc-env",
     });
   });
 });
@@ -123,7 +127,6 @@ describe("options.schema", () => {
     expect(env).toEqual({
       ABC: "abc-env",
       FOO: "foo-env",
-      BAR: "bar-defaults",
     });
   });
 
@@ -136,7 +139,6 @@ describe("options.schema", () => {
     expect(env).toEqual({
       ABC: "abc-env",
       FOO: "foo-env",
-      BAR: "bar-defaults",
     });
   });
 
@@ -161,8 +163,7 @@ describe("options.files", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
-      XYZ: undefined,
+      ABC: "abc-env",
     });
   });
 
@@ -174,8 +175,8 @@ describe("options.files", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
+      ABC: "abc-env-local",
       BAZ: "baz-env-local",
-      XYZ: undefined,
     });
   });
 
@@ -187,8 +188,7 @@ describe("options.files", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAZ: undefined,
-      XYZ: undefined,
+      ABC: "abc-env",
     });
   });
 
@@ -200,8 +200,8 @@ describe("options.files", () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
+      ABC: "abc-env-local",
       BAZ: "baz-env-local",
-      XYZ: undefined,
     });
   });
 });
@@ -216,8 +216,8 @@ describe('when NODE_ENV === "development"', () => {
 
     expect(env).toEqual({
       FOO: "foo-env",
+      ABC: "abc-env-local",
       BAZ: "baz-env-local",
-      XYZ: undefined,
     });
   });
 });
@@ -234,14 +234,13 @@ describe("variable substitution / interpolation", () => {
   test("to substitute correctly when system vars are enabled", () => {
     const env = dotenv.config({
       ...options,
-      defaults: false,
-      schema: false,
+      system: true,
       files: ".env.variables",
     });
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAR: "foo-env@/DEF-process-env",
+      BAR: "foo-env@baz-env/DEF-process-env",
       BAZ: "baz-env",
       ABC: "$NOOP/",
     });
@@ -250,15 +249,13 @@ describe("variable substitution / interpolation", () => {
   test("to substitute correctly when system vars are disabled", () => {
     const env = dotenv.config({
       ...options,
-      defaults: false,
-      schema: false,
       system: false,
       files: ".env.variables",
     });
 
     expect(env).toEqual({
       FOO: "foo-env",
-      BAR: "foo-env@/",
+      BAR: "foo-env@baz-env/",
       BAZ: "baz-env",
       ABC: "$NOOP/",
     });
