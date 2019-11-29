@@ -13,6 +13,11 @@
   "bugs": {
     "url": "https://github.com/rudionrails/yummy-dotenv/issues"
   },
+  "files": [
+    "index.js",
+    "config.js",
+    "test"
+  ],
   "keywords": [
     "dotenv",
     "env",
