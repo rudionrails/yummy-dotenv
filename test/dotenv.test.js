@@ -1,7 +1,7 @@
 const path = require("path");
 
 // module under test
-const dotenv = require("../src/index");
+const dotenv = require("../index");
 
 const { NODE_ENV } = process.env;
 const options = {
