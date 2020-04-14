@@ -7,6 +7,7 @@ dist/
 
 # testing
 /coverage
+.nyc_output
 
 # linting
 .eslintcache
