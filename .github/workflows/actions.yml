@@ -10,9 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
-      - run: npm install
-      - run: npm run lint
-      - run: npm run test
+      - name: Install, lint and test
+        run: |
+            npm install
+            npm run lint
+            npm run test
+      - name: Archive code coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: coverage/lcov-report/index.html
