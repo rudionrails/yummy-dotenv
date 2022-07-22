@@ -7,8 +7,10 @@ const isDev = () => nodeEnv() === "development";
 
 const isString = /* #__PURE__ */ (x) => typeof x === "string";
 const isObject = /* #__PURE__ */ (x) => typeof x === "object";
-const pipe = /* #__PURE__ */ (...fns) => (x) =>
-  fns.reduce((acc, fn) => fn(acc), x);
+const pipe =
+  (...fns) =>
+  (x) =>
+    fns.reduce((acc, fn) => fn(acc), x);
 const when = /* #__PURE__ */ (conditionFn, fn) => (x) =>
   conditionFn(x) ? fn(x) : x;
 const mergeRight = /* #__PURE__ */ (x) => (y) => ({ ...x, ...y });
