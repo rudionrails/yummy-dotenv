@@ -11,10 +11,10 @@ An opinionated .env parsing library. Key features:
 ## Installation
 
 ```shell
-// npm
+# npm
 npm i @yummy/dotenv
 
-// OR yarn
+# OR yarn
 yarn add @yummy/dotenv
 ```
 
