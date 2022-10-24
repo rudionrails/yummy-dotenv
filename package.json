@@ -31,17 +31,17 @@
     "lint": "eslint . --ignore-path .gitignore",
     "prerelease": "npm run lint && npm run test",
     "release": "standard-version",
-    "test": "nyc ava"
+    "test": "c8 ava"
   },
   "dependencies": {
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
     "ava": "^5.0.1",
+    "c8": "^7.12.0",
     "eslint": "^8.20.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "nyc": "^15.1.0",
     "prettier": "^2.7.1",
     "standard-version": "^9.5.0"
   }
