@@ -100,7 +100,7 @@ const config = ({
     ),
     // the content of the regular files
     readList(context, files),
-    // reduce the key-value pairs down to what is efined in the schema
+    // reduce the key-value pairs down to what is defined in the schema
     when(() => exists(context, schema), filter(context, schema)),
     // allow system variables to take precedence
     when(() => system, only(process.env)),

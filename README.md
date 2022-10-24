@@ -1,8 +1,26 @@
 # A yummy dotenv library
 
+An opinionated .env parsing library. Key features:
+- read .env-files based on `NODE_ENV`, e.g. .env, .env.local, .env.development
+- pass custom default values for your variables
+- allow / prevent variable inclusion from `proces.env`
+- use `.env.schema` to only allow certain values
+- parameter expansion / interpolation of env-variables, e.g. `GREET="Hello ${NAME}`
+
+
+## Installation
+
+```shell
+// npm
+npm i @yummy/dotenv
+
+// OR yarn
+yarn add @yummy/dotenv
+```
+
 ## Usage
 
-This opinionated dotenv library makes some assumptions based on available `.env`-files. Unless configured otherwise, the following load order applies as follows:
+This library makes some assumptions based on available `.env`-files. Unless configured otherwise, the following load order applies as follows:
 
 - `.env.defaults`
 - `.env`
@@ -15,11 +33,14 @@ This opinionated dotenv library makes some assumptions based on available `.env`
 The default options used are as follows:
 
 ```javascript
+// for ES6, use `import dotenv from "@yummy/dotenv";`
+const dotenv = require("@yummy/dotenv");
+
 const env = dotenv.config({
   // the directory to read the .env-files from
   context = path.resolve(process.cwd()),
 
-  // allos system variables to take precedence
+  // allow system variables to take precedence
   system = true,
 
   // limit variables to keys specified in here
