@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 const path = require("path");
 const test = require("ava");
 
@@ -6,6 +5,7 @@ const test = require("ava");
 const dotenv = require("../index");
 
 const options = {
+  overrideProcessEnv: false,
   context: path.resolve(__dirname, "fixtures"),
   schema: false,
   defaults: false,
@@ -53,8 +53,8 @@ test("to allow object", (t) => {
   const env = dotenv.config({
     ...options,
     defaults: {
-      BAR: "BAR/${XYZ}", // eslint-ddeepEqualable-line no-template-curly-in-string
-      BAZ: "${BAR}/BAZ/${ABC}", // eslint-ddeepEqualable-line no-template-curly-in-string
+      BAR: "BAR/${XYZ}",
+      BAZ: "${BAR}/BAZ/${ABC}",
       XYZ: "xyz-defaults-object",
     },
   });
