@@ -1,6 +1,6 @@
 {
   "name": "@yummy/dotenv",
-  "version": "3.4.9",
+  "version": "4.0.0",
   "description": "A yummy dotenv library",
   "main": "index.js",
   "author": "Rudolf Schmidt <hello@rudionrails.com>",
