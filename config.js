@@ -1,3 +1,3 @@
 const dotenv = require("./index");
 
-const env = dotenv.config({ override: false });
+const env = dotenv.config({ override: true });
