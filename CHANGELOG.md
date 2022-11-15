@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.1](https://github.com/rudionrails/yummy-dotenv/compare/v5.0.0...v5.0.1) (2022-11-15)
+
+
+### Bug Fixes
+
+*  overrides process.env ([181d789](https://github.com/rudionrails/yummy-dotenv/commit/181d7890aad73be9907c171f1103ba1af217c99f))
+
 ## [5.0.0](https://github.com/rudionrails/yummy-dotenv/compare/v4.0.1...v5.0.0) (2022-11-15)
 
 
