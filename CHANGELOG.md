@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/rudionrails/yummy-dotenv/compare/v4.0.1...v5.0.0) (2022-11-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* provess.env is not replaced by default
+
+### Features
+
+* Renames overrideProcessEnv => override ([477e175](https://github.com/rudionrails/yummy-dotenv/commit/477e1756a2217e5ec9c0944acd4ccccb08e3444f))
+
 ### [4.0.1](https://github.com/rudionrails/yummy-dotenv/compare/v4.0.0...v4.0.1) (2022-11-01)
 
 ## [4.0.0](https://github.com/rudionrails/yummy-dotenv/compare/v3.4.9...v4.0.0) (2022-11-01)
