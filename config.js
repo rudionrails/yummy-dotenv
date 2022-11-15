@@ -1,4 +1,3 @@
 const dotenv = require("./index");
 
-const env = dotenv.config();
-Object.assign(process, { env });
+const env = dotenv.config({ override: false });

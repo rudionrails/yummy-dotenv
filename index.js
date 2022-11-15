@@ -77,7 +77,7 @@ function interpolate(defaults, object) {
 
 function config(options = {}) {
   const {
-    overrideProcessEnv = true,
+    override = false,
     context = process.cwd(),
     defaults = ".env.defaults",
     schema = ".env.schema",
@@ -117,7 +117,7 @@ function config(options = {}) {
     (object) => interpolate(system ? process.env : {}, object),
   )({});
 
-  if (overrideProcessEnv) {
+  if (override) {
     Object.assign(process, { env });
   }
 

@@ -37,9 +37,9 @@ The default options used are as follows:
 const dotenv = require("@yummy/dotenv");
 
 const env = dotenv.config({
-  // replaces process.env with what is parsed by this library. Set it to false
-  // if you don't want this and assign the result to a local variable.
-  overrideProcessEnv = true
+  // replaces process.env with what is parsed by this library. Set it to true
+  // if you want to opt into this.
+  override = false
 
   // the directory to read the .env-files from
   context = path.resolve(process.cwd()),

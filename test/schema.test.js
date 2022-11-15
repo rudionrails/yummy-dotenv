@@ -5,7 +5,6 @@ const test = require("ava");
 const dotenv = require("../index");
 
 const options = {
-  overrideProcessEnv: false,
   context: path.resolve(__dirname, "fixtures"),
   schema: false,
   defaults: false,
